@@ -70,28 +70,6 @@ function App() {
                 <p className="text-muted-foreground text-sm">Smart citation generator for academic research</p>
               </div>
             </div>
-            
-            {/* Global Reference Style Selection */}
-            <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <GraduationCap size={22} className="text-primary" />
-                  <span className="text-sm font-semibold text-primary">Reference Style:</span>
-                </div>
-                <Select value={preferredStyle} onValueChange={(value: CitationStyle) => setPreferredStyle(value)}>
-                  <SelectTrigger className="w-[200px] bg-white border-primary/30 font-medium">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(styleNames).map(([key, name]) => (
-                      <SelectItem key={key} value={key}>
-                        {name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
           </div>
         </div>
       </header>
@@ -100,7 +78,46 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Citation Tools */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-6">
+            {/* Top Ad Placement */}
+            <Card className="bg-muted/30 border-dashed border-2">
+              <CardContent className="p-8 text-center">
+                <div className="text-sm text-muted-foreground mb-2">Advertisement</div>
+                <div className="text-xs text-muted-foreground opacity-60">
+                  728x90 Leaderboard Ad Space
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Reference Style Selection */}
+            <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                      <GraduationCap size={24} className="text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">Citation Style</h3>
+                      <p className="text-sm text-muted-foreground">Choose your preferred referencing format</p>
+                    </div>
+                  </div>
+                  <Select value={preferredStyle} onValueChange={(value: CitationStyle) => setPreferredStyle(value)}>
+                    <SelectTrigger className="w-[220px] bg-white border-primary/30 font-medium shadow-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(styleNames).map(([key, name]) => (
+                        <SelectItem key={key} value={key}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="search" className="flex items-center gap-2">
