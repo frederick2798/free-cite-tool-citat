@@ -4,9 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { BookOpen, Download, Search, FileText, GraduationCap } from '@phosphor-icons/react'
+import { BookOpen, Download, Search, FileText, GraduationCap, Plus } from '@phosphor-icons/react'
 import { ArticleSearch } from '@/components/ArticleSearch'
 import { UrlCitationForm } from '@/components/UrlCitationForm'
+import { ManualCitationForm } from '@/components/ManualCitationForm'
 import { Bibliography } from '@/components/Bibliography'
 import { CitationStyleConverter } from '@/components/CitationStyleConverter'
 
@@ -119,10 +120,14 @@ function App() {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="search" className="flex items-center gap-2">
                   <Search size={16} />
                   <span className="hidden sm:inline">Smart Search</span>
+                </TabsTrigger>
+                <TabsTrigger value="manual" className="flex items-center gap-2">
+                  <Plus size={16} />
+                  <span className="hidden sm:inline">Add Source</span>
                 </TabsTrigger>
                 <TabsTrigger value="url" className="flex items-center gap-2">
                   <FileText size={16} />
@@ -154,6 +159,10 @@ function App() {
                       />
                     </CardContent>
                   </Card>
+                </TabsContent>
+
+                <TabsContent value="manual" className="space-y-6">
+                  <ManualCitationForm onCitationAdd={addCitation} />
                 </TabsContent>
 
                 <TabsContent value="url" className="space-y-6">
@@ -255,6 +264,12 @@ function App() {
                   <p className="font-medium mb-1">Smart Search</p>
                   <p className="text-muted-foreground text-xs">
                     Enter article titles - our AI finds and auto-fills citation details with confidence scores
+                  </p>
+                </div>
+                <div className="text-sm">
+                  <p className="font-medium mb-1">Add Source</p>
+                  <p className="text-muted-foreground text-xs">
+                    Manually cite books, articles, websites, and more with guided forms for each source type
                   </p>
                 </div>
                 <div className="text-sm">

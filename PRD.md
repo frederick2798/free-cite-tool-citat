@@ -33,6 +33,13 @@ This app requires article search, citation formatting, bibliography management, 
 - **Progression**: Save citations → Organize in bibliography → Edit details → Export to Word/Google Docs
 - **Success criteria**: Persistent storage, easy editing interface, reliable export functionality
 
+### Manual Source Citation
+- **Functionality**: Comprehensive manual citation form supporting books, articles, websites, journals, newspapers, theses, conference papers, and reports
+- **Purpose**: Enable users to cite any source type with guided forms and required field validation
+- **Trigger**: User selects "Add Source" tab and chooses source type
+- **Progression**: Select source type → Fill guided form with required/optional fields → Validate data → Save to bibliography
+- **Success criteria**: Support all major source types, clear field guidance, proper validation feedback
+
 ### URL Metadata Extraction
 - **Functionality**: Extract citation data from website URLs automatically
 - **Purpose**: Quickly cite web sources without manual data entry
@@ -87,7 +94,7 @@ Subtle, purposeful animations that enhance usability without academic distractio
 
 ## Component Selection
 
-- **Components**: Card layouts for citations and search results, Dialog for detailed editing, Form components for manual entry, Tabs for citation style switching, Button variants for different action priorities, Badge components for confidence scores, Progress indicators for search states
+- **Components**: Card layouts for citations and search results, Dialog for detailed editing, Form components for manual entry and source type selection, Tabs for citation style switching and tool navigation, Button variants for different action priorities including source type selection, Badge components for confidence scores and field requirements, Progress indicators for search states, Select components for citation styles and source types
 - **Customizations**: Custom confidence score visualizer component, specialized citation formatter component, export progress indicator
 - **States**: Search states (idle, searching, results, error), citation states (draft, saved, exported), confidence levels (high, medium, low) with distinct visual treatments
 - **Icon Selection**: Search (MagnifyingGlass), Export (Download), Edit (Pencil), Academic sources (BookOpen), Confidence (CheckCircle, ExclamationCircle)
