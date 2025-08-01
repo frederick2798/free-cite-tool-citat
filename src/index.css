@@ -11,6 +11,15 @@
   }
 }
 
+/* Custom styles for citation style dropdown */
+.citation-style-trigger {
+  color: white !important;
+}
+
+.citation-style-trigger [data-radix-select-value] {
+  color: white !important;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.2 0 0);

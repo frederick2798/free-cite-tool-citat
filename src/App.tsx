@@ -274,8 +274,8 @@ ${citation.url ? `URL: ${citation.url}` : ''}
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                     <Select value={preferredStyle} onValueChange={(value: CitationStyle) => setPreferredStyle(value)}>
-                      <SelectTrigger className="w-[280px] bg-white border-0 font-semibold shadow-lg text-lg h-14">
-                        <SelectValue />
+                      <SelectTrigger className="w-[280px] bg-white border-0 font-semibold shadow-lg text-lg h-14 citation-style-trigger">
+                        <SelectValue className="text-white" />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(styleNames).map(([key, name]) => (
