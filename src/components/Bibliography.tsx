@@ -16,26 +16,28 @@ import {
   Copy,
   SortAsc,
   SortDesc,
-  Filter
+  Filter,
+  Quotes
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import type { Citation } from '@/App'
+import type { Citation, CitationStyle } from '@/App'
 
 interface BibliographyProps {
   citations: Citation[]
   onUpdate: (id: string, citation: Citation) => void
   onDelete: (id: string) => void
+  preferredStyle: CitationStyle
 }
 
 type SortOption = 'title' | 'author' | 'year' | 'type' | 'dateAdded'
 type FilterOption = 'all' | 'article' | 'website' | 'book' | 'journal'
 
-export function Bibliography({ citations, onUpdate, onDelete }: BibliographyProps) {
+export function Bibliography({ citations, onUpdate, onDelete, preferredStyle }: BibliographyProps) {
   const [sortBy, setSortBy] = useState<SortOption>('title')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [filterBy, setFilterBy] = useState<FilterOption>('all')
   const [editingCitation, setEditingCitation] = useState<Citation | null>(null)
-  const [exportFormat, setExportFormat] = useState<'apa' | 'mla'>('apa')
+  const [exportFormat, setExportFormat] = useState<CitationStyle>(preferredStyle)
 
   const filteredAndSortedCitations = citations
     .filter(citation => filterBy === 'all' || citation.type === filterBy)
@@ -64,30 +66,158 @@ export function Bibliography({ citations, onUpdate, onDelete }: BibliographyProp
       return sortOrder === 'asc' ? comparison : -comparison
     })
 
-  const formatCitationForExport = (citation: Citation, style: 'apa' | 'mla'): string => {
-    const { title, authors, year, source, url } = citation
+  const formatCitationForExport = (citation: Citation, style: CitationStyle): string => {
+    const { title, authors, year, source, url, pages, volume, issue, publisher } = citation
     const authorStr = authors.length > 0 ? authors.join(', ') : 'Unknown Author'
     
-    if (style === 'apa') {
-      let result = `${authorStr} (${year || 'n.d.'}). ${title}. `
-      if (citation.type === 'website' && source) {
-        result += `*${source}*.`
-        if (url) result += ` ${url}`
-      } else if (source) {
-        result += `*${source}*.`
-      }
-      return result
-    } else { // MLA
-      let result = `${authorStr}. "${title}." `
-      if (source) result += `*${source}*`
-      if (year) result += `, ${year}`
-      if (citation.type === 'website' && url) result += '. Web.'
-      result += '.'
-      return result
+    switch (style) {
+      case 'apa':
+        let apaResult = `${authorStr} (${year || 'n.d.'}). ${title}.`
+        if (citation.type === 'journal' && source) {
+          apaResult += ` *${source}*`
+          if (volume) apaResult += `, ${volume}`
+          if (issue) apaResult += `(${issue})`
+          if (pages) apaResult += `, ${pages}`
+          apaResult += '.'
+        } else if (citation.type === 'website') {
+          if (source) apaResult += ` *${source}*.`
+          if (url) apaResult += ` ${url}`
+        } else {
+          if (source) apaResult += ` *${source}*.`
+          if (publisher) apaResult += ` ${publisher}.`
+        }
+        return apaResult
+
+      case 'mla':
+        let mlaResult = `${authorStr}. "${title}."`
+        if (citation.type === 'journal' && source) {
+          mlaResult += ` *${source}*`
+          if (volume) mlaResult += `, vol. ${volume}`
+          if (issue) mlaResult += `, no. ${issue}`
+          if (year) mlaResult += `, ${year}`
+          if (pages) mlaResult += `, pp. ${pages}`
+          mlaResult += '.'
+        } else if (citation.type === 'website') {
+          if (source) mlaResult += ` *${source}*`
+          if (year) mlaResult += `, ${year}`
+          if (url) mlaResult += `. Web.`
+        } else {
+          if (source) mlaResult += ` *${source}*.`
+          if (publisher) mlaResult += ` ${publisher}`
+          if (year) mlaResult += `, ${year}`
+          mlaResult += '.'
+        }
+        return mlaResult
+
+      case 'chicago':
+        let chicagoResult = `${authorStr}. "${title}."`
+        if (citation.type === 'journal' && source) {
+          chicagoResult += ` *${source}*`
+          if (volume) chicagoResult += ` ${volume}`
+          if (issue) chicagoResult += `, no. ${issue}`
+          if (year) chicagoResult += ` (${year})`
+          if (pages) chicagoResult += `: ${pages}`
+          chicagoResult += '.'
+        } else if (citation.type === 'website') {
+          if (source) chicagoResult += ` *${source}*.`
+          if (year) chicagoResult += ` ${year}.`
+          if (url) chicagoResult += ` ${url}.`
+        } else {
+          if (publisher) chicagoResult += ` ${publisher}`
+          if (year) chicagoResult += `, ${year}`
+          chicagoResult += '.'
+        }
+        return chicagoResult
+
+      case 'harvard':
+        let harvardResult = `${authorStr} (${year || 'n.d.'}) '${title}'`
+        if (citation.type === 'journal' && source) {
+          harvardResult += `, *${source}*`
+          if (volume) harvardResult += `, vol. ${volume}`
+          if (issue) harvardResult += `, no. ${issue}`
+          if (pages) harvardResult += `, pp. ${pages}`
+          harvardResult += '.'
+        } else if (citation.type === 'website') {
+          if (source) harvardResult += `, *${source}*`
+          if (url) harvardResult += `, available at: ${url}.`
+        } else {
+          if (publisher) harvardResult += `, ${publisher}`
+          harvardResult += '.'
+        }
+        return harvardResult
+
+      default:
+        return 'Unsupported citation style'
     }
   }
 
-  const exportBibliography = () => {
+  const formatInTextCitation = (citation: Citation, style: CitationStyle): string => {
+    const { authors, year, pages } = citation
+    const firstAuthor = authors.length > 0 ? authors[0] : 'Unknown Author'
+    const authorLastName = firstAuthor.includes(',') ? firstAuthor.split(',')[0] : firstAuthor.split(' ').pop() || 'Unknown'
+    
+    switch (style) {
+      case 'apa':
+        if (authors.length === 1) {
+          return pages ? `(${authorLastName}, ${year || 'n.d.'}, p. ${pages})` : `(${authorLastName}, ${year || 'n.d.'})`
+        } else if (authors.length === 2) {
+          const secondAuthor = authors[1].includes(',') ? authors[1].split(',')[0] : authors[1].split(' ').pop() || 'Unknown'
+          return pages ? `(${authorLastName} & ${secondAuthor}, ${year || 'n.d.'}, p. ${pages})` : `(${authorLastName} & ${secondAuthor}, ${year || 'n.d.'})`
+        } else {
+          return pages ? `(${authorLastName} et al., ${year || 'n.d.'}, p. ${pages})` : `(${authorLastName} et al., ${year || 'n.d.'})`
+        }
+
+      case 'mla':
+        return pages ? `(${authorLastName} ${pages})` : `(${authorLastName})`
+
+      case 'chicago':
+        return pages ? `(${authorLastName} ${year || 'n.d.'}, ${pages})` : `(${authorLastName} ${year || 'n.d.'})`
+
+      case 'harvard':
+        return pages ? `(${authorLastName} ${year || 'n.d.'}: ${pages})` : `(${authorLastName} ${year || 'n.d.'})`
+
+      default:
+        return `(${authorLastName}, ${year || 'n.d.'})`
+    }
+  }
+
+  const copyInTextCitation = async (citation: Citation) => {
+    const inTextCitation = formatInTextCitation(citation, exportFormat)
+    try {
+      await navigator.clipboard.writeText(inTextCitation)
+      toast.success('In-text citation copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy in-text citation')
+    }
+  }
+
+  const copyFullCitation = async (citation: Citation) => {
+    const fullCitation = formatCitationForExport(citation, exportFormat)
+    try {
+      await navigator.clipboard.writeText(fullCitation)
+      toast.success('Full citation copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy citation')
+    }
+  }
+
+  const copyAllCitations = async () => {
+    if (filteredAndSortedCitations.length === 0) {
+      toast.error('No citations to copy')
+      return
+    }
+
+    const formattedCitations = filteredAndSortedCitations.map(citation => 
+      formatCitationForExport(citation, exportFormat)
+    ).join('\n\n')
+
+    try {
+      await navigator.clipboard.writeText(formattedCitations)
+      toast.success('All citations copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy citations')
+    }
+  }
     if (filteredAndSortedCitations.length === 0) {
       toast.error('No citations to export')
       return
@@ -110,21 +240,23 @@ export function Bibliography({ citations, onUpdate, onDelete }: BibliographyProp
     toast.success('Bibliography exported successfully!')
   }
 
-  const copyAllCitations = async () => {
-    if (filteredAndSortedCitations.length === 0) {
-      toast.error('No citations to copy')
-      return
-    }
-
-    const formattedCitations = filteredAndSortedCitations.map(citation => 
-      formatCitationForExport(citation, exportFormat)
-    ).join('\n\n')
-
+  const copyInTextCitation = async (citation: Citation) => {
+    const inTextCitation = formatInTextCitation(citation, exportFormat)
     try {
-      await navigator.clipboard.writeText(formattedCitations)
-      toast.success('All citations copied to clipboard!')
+      await navigator.clipboard.writeText(inTextCitation)
+      toast.success('In-text citation copied to clipboard!')
     } catch (error) {
-      toast.error('Failed to copy citations')
+      toast.error('Failed to copy in-text citation')
+    }
+  }
+
+  const copyFullCitation = async (citation: Citation) => {
+    const fullCitation = formatCitationForExport(citation, exportFormat)
+    try {
+      await navigator.clipboard.writeText(fullCitation)
+      toast.success('Full citation copied to clipboard!')
+    } catch (error) {
+      toast.error('Failed to copy citation')
     }
   }
 
@@ -240,13 +372,15 @@ export function Bibliography({ citations, onUpdate, onDelete }: BibliographyProp
 
             {/* Export Controls */}
             <div className="flex gap-2">
-              <Select value={exportFormat} onValueChange={(value: 'apa' | 'mla') => setExportFormat(value)}>
-                <SelectTrigger className="w-[100px]">
+              <Select value={exportFormat} onValueChange={(value: CitationStyle) => setExportFormat(value)}>
+                <SelectTrigger className="w-[120px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="apa">APA</SelectItem>
                   <SelectItem value="mla">MLA</SelectItem>
+                  <SelectItem value="chicago">Chicago</SelectItem>
+                  <SelectItem value="harvard">Harvard</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -300,6 +434,25 @@ export function Bibliography({ citations, onUpdate, onDelete }: BibliographyProp
                   {/* Formatted Citation Preview */}
                   <div className="mt-3 p-3 bg-muted rounded text-sm font-mono leading-relaxed">
                     {formatCitationForExport(citation, exportFormat)}
+                  </div>
+                  
+                  {/* In-text Citation Preview */}
+                  <div className="mt-2 p-2 bg-accent/10 rounded text-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs text-muted-foreground font-medium">In-text citation:</span>
+                        <p className="font-mono text-accent-foreground mt-1">{formatInTextCitation(citation, exportFormat)}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyInTextCitation(citation)}
+                        className="shrink-0"
+                      >
+                        <Quotes size={12} className="mr-1" />
+                        Copy
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -370,6 +523,41 @@ export function Bibliography({ citations, onUpdate, onDelete }: BibliographyProp
                             </div>
                           </div>
                           
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-volume">Volume</Label>
+                              <Input
+                                id="edit-volume"
+                                value={editingCitation.volume || ''}
+                                onChange={(e) => setEditingCitation(prev => 
+                                  prev ? { ...prev, volume: e.target.value } : null
+                                )}
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-issue">Issue</Label>
+                              <Input
+                                id="edit-issue"
+                                value={editingCitation.issue || ''}
+                                onChange={(e) => setEditingCitation(prev => 
+                                  prev ? { ...prev, issue: e.target.value } : null
+                                )}
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-pages">Pages</Label>
+                              <Input
+                                id="edit-pages"
+                                value={editingCitation.pages || ''}
+                                onChange={(e) => setEditingCitation(prev => 
+                                  prev ? { ...prev, pages: e.target.value } : null
+                                )}
+                              />
+                            </div>
+                          </div>
+                          
                           <div className="space-y-2">
                             <Label htmlFor="edit-url">URL</Label>
                             <Input
@@ -393,6 +581,15 @@ export function Bibliography({ citations, onUpdate, onDelete }: BibliographyProp
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
+
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => copyFullCitation(citation)}
+                  >
+                    <Copy size={14} className="mr-1" />
+                    Copy
+                  </Button>
 
                   <Button 
                     variant="outline" 

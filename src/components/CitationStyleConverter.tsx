@@ -5,13 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Copy, Download, BookOpen } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import type { Citation } from '@/App'
+import type { Citation, CitationStyle } from '@/App'
 
 interface CitationStyleConverterProps {
   citations: Citation[]
 }
-
-type CitationStyle = 'apa' | 'mla' | 'chicago' | 'harvard'
 
 const styleNames: Record<CitationStyle, string> = {
   apa: 'APA 7th Edition',

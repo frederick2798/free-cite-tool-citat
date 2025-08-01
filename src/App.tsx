@@ -3,7 +3,8 @@ import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BookOpen, Download, Search, FileText } from '@phosphor-icons/react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { BookOpen, Download, Search, FileText, GraduationCap } from '@phosphor-icons/react'
 import { ArticleSearch } from '@/components/ArticleSearch'
 import { UrlCitationForm } from '@/components/UrlCitationForm'
 import { Bibliography } from '@/components/Bibliography'
@@ -26,9 +27,19 @@ export interface Citation {
   confidence?: number
 }
 
+export type CitationStyle = 'apa' | 'mla' | 'chicago' | 'harvard'
+
 function App() {
   const [savedCitations, setSavedCitations] = useKV<Citation[]>('bibliography', [])
   const [activeTab, setActiveTab] = useState('search')
+  const [preferredStyle, setPreferredStyle] = useKV<CitationStyle>('preferred-style', 'apa')
+
+  const styleNames: Record<CitationStyle, string> = {
+    apa: 'APA 7th Edition',
+    mla: 'MLA 9th Edition', 
+    chicago: 'Chicago Manual',
+    harvard: 'Harvard Referencing'
+  }
 
   const addCitation = (citation: Citation) => {
     setSavedCitations((current) => [...current, citation])
@@ -49,13 +60,35 @@ function App() {
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <BookOpen size={24} className="text-primary-foreground" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <BookOpen size={24} className="text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Free Cite Tool</h1>
+                <p className="text-muted-foreground text-sm">Smart citation generator for academic research</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Free Cite Tool</h1>
-              <p className="text-muted-foreground text-sm">Smart citation generator for academic research</p>
+            
+            {/* Global Reference Style Selection */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <GraduationCap size={20} className="text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">Reference Style:</span>
+              </div>
+              <Select value={preferredStyle} onValueChange={(value: CitationStyle) => setPreferredStyle(value)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(styleNames).map(([key, name]) => (
+                    <SelectItem key={key} value={key}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -96,7 +129,10 @@ function App() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <ArticleSearch onCitationAdd={addCitation} />
+                      <ArticleSearch 
+                        onCitationAdd={addCitation} 
+                        preferredStyle={preferredStyle}
+                      />
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -134,6 +170,7 @@ function App() {
                     citations={savedCitations}
                     onUpdate={updateCitation}
                     onDelete={deleteCitation}
+                    preferredStyle={preferredStyle}
                   />
                 </TabsContent>
               </div>
@@ -198,19 +235,25 @@ function App() {
                 <div className="text-sm">
                   <p className="font-medium mb-1">Smart Search</p>
                   <p className="text-muted-foreground text-xs">
-                    Just enter the article title - we'll find and auto-fill the details
+                    Enter article titles - our AI finds and auto-fills citation details with confidence scores
                   </p>
                 </div>
                 <div className="text-sm">
-                  <p className="font-medium mb-1">Confidence Scores</p>
+                  <p className="font-medium mb-1">Edit & Refine</p>
                   <p className="text-muted-foreground text-xs">
-                    Green = High confidence, Yellow = Medium, Red = Low
+                    Click "Edit" on search results to refine details before adding to bibliography
                   </p>
                 </div>
                 <div className="text-sm">
-                  <p className="font-medium mb-1">Export Formats</p>
+                  <p className="font-medium mb-1">In-Text Citations</p>
                   <p className="text-muted-foreground text-xs">
-                    Download as Word docs or copy for Google Docs
+                    Copy both full citations and in-text references in your preferred style
+                  </p>
+                </div>
+                <div className="text-sm">
+                  <p className="font-medium mb-1">Reference Styles</p>
+                  <p className="text-muted-foreground text-xs">
+                    Choose from APA, MLA, Chicago, or Harvard formatting styles
                   </p>
                 </div>
               </CardContent>
