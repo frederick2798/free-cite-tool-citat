@@ -72,23 +72,25 @@ function App() {
             </div>
             
             {/* Global Reference Style Selection */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <GraduationCap size={20} className="text-muted-foreground" />
-                <span className="text-sm font-medium text-muted-foreground">Reference Style:</span>
+            <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-3">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <GraduationCap size={22} className="text-primary" />
+                  <span className="text-sm font-semibold text-primary">Reference Style:</span>
+                </div>
+                <Select value={preferredStyle} onValueChange={(value: CitationStyle) => setPreferredStyle(value)}>
+                  <SelectTrigger className="w-[200px] bg-white border-primary/30 font-medium">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(styleNames).map(([key, name]) => (
+                      <SelectItem key={key} value={key}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Select value={preferredStyle} onValueChange={(value: CitationStyle) => setPreferredStyle(value)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(styleNames).map(([key, name]) => (
-                    <SelectItem key={key} value={key}>
-                      {name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </div>
