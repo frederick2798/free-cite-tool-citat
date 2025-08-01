@@ -423,7 +423,7 @@ export function Bibliography({ citations, onUpdate, onDelete, preferredStyle }: 
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-xs text-muted-foreground font-medium">In-text citation:</span>
-                        <p className="font-mono text-accent-foreground mt-1">{formatInTextCitation(citation, exportFormat)}</p>
+                        <p className="font-mono text-foreground mt-1">{formatInTextCitation(citation, exportFormat)}</p>
                       </div>
                       <Button
                         variant="ghost"

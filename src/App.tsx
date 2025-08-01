@@ -5,9 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { BookOpen, Download, Search, FileText, GraduationCap, Plus } from '@phosphor-icons/react'
-import { ArticleSearch } from '@/components/ArticleSearch'
+import { CombinedCitationForm } from '@/components/CombinedCitationForm'
 import { UrlCitationForm } from '@/components/UrlCitationForm'
-import { ManualCitationForm } from '@/components/ManualCitationForm'
 import { Bibliography } from '@/components/Bibliography'
 import { CitationStyleConverter } from '@/components/CitationStyleConverter'
 
@@ -32,7 +31,7 @@ export type CitationStyle = 'apa' | 'mla' | 'chicago' | 'harvard'
 
 function App() {
   const [savedCitations, setSavedCitations] = useKV<Citation[]>('bibliography', [])
-  const [activeTab, setActiveTab] = useState('search')
+  const [activeTab, setActiveTab] = useState('citations')
   const [preferredStyle, setPreferredStyle] = useKV<CitationStyle>('preferred-style', 'apa')
 
   const styleNames: Record<CitationStyle, string> = {
@@ -120,14 +119,10 @@ function App() {
             </Card>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="search" className="flex items-center gap-2">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="citations" className="flex items-center gap-2">
                   <Search size={16} />
-                  <span className="hidden sm:inline">Smart Search</span>
-                </TabsTrigger>
-                <TabsTrigger value="manual" className="flex items-center gap-2">
-                  <Plus size={16} />
-                  <span className="hidden sm:inline">Add Source</span>
+                  <span className="hidden sm:inline">Citations</span>
                 </TabsTrigger>
                 <TabsTrigger value="url" className="flex items-center gap-2">
                   <FileText size={16} />
@@ -144,25 +139,11 @@ function App() {
               </TabsList>
 
               <div className="mt-6">
-                <TabsContent value="search" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Smart Article Search</CardTitle>
-                      <CardDescription>
-                        Enter an article title and we'll find matching articles with confidence scores
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ArticleSearch 
-                        onCitationAdd={addCitation} 
-                        preferredStyle={preferredStyle}
-                      />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="manual" className="space-y-6">
-                  <ManualCitationForm onCitationAdd={addCitation} />
+                <TabsContent value="citations" className="space-y-6">
+                  <CombinedCitationForm 
+                    onCitationAdd={addCitation} 
+                    preferredStyle={preferredStyle}
+                  />
                 </TabsContent>
 
                 <TabsContent value="url" className="space-y-6">
@@ -261,15 +242,9 @@ function App() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="text-sm">
-                  <p className="font-medium mb-1">Smart Search</p>
+                  <p className="font-medium mb-1">Citations</p>
                   <p className="text-muted-foreground text-xs">
-                    Enter article titles - our AI finds and auto-fills citation details with confidence scores
-                  </p>
-                </div>
-                <div className="text-sm">
-                  <p className="font-medium mb-1">Add Source</p>
-                  <p className="text-muted-foreground text-xs">
-                    Manually cite books, articles, websites, and more with guided forms for each source type
+                    Search for articles or manually add sources like books, websites, and more
                   </p>
                 </div>
                 <div className="text-sm">

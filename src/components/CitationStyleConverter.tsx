@@ -158,7 +158,7 @@ export function CitationStyleConverter({ citations }: CitationStyleConverterProp
         <div className="space-y-2">
           <label className="text-sm font-medium">Select Citation</label>
           <Select value={selectedCitation} onValueChange={setSelectedCitation}>
-            <SelectTrigger>
+            <SelectTrigger className="h-11">
               <SelectValue placeholder="Choose a citation to convert" />
             </SelectTrigger>
             <SelectContent>
@@ -179,7 +179,7 @@ export function CitationStyleConverter({ citations }: CitationStyleConverterProp
         <div className="space-y-2">
           <label className="text-sm font-medium">Citation Style</label>
           <Select value={selectedStyle} onValueChange={(value: CitationStyle) => setSelectedStyle(value)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

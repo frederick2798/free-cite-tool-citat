@@ -176,13 +176,13 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && extractMetadata()}
               disabled={isExtracting}
-              className="text-base"
+              className="text-base h-12"
             />
           </div>
           <Button 
             onClick={extractMetadata}
             disabled={isExtracting || !url.trim()}
-            className="min-w-[140px]"
+            className="min-w-[140px] h-12"
           >
             {isExtracting ? (
               <>
@@ -226,6 +226,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
               placeholder="Article or page title"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
+              className="h-11"
             />
           </div>
 
@@ -237,6 +238,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
               placeholder="Separate multiple authors with commas"
               value={formData.authors}
               onChange={(e) => handleInputChange('authors', e.target.value)}
+              className="h-11"
             />
           </div>
 
@@ -249,6 +251,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
                 placeholder="2024"
                 value={formData.year}
                 onChange={(e) => handleInputChange('year', e.target.value)}
+                className="h-11"
               />
             </div>
             <div className="space-y-2">
@@ -258,6 +261,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
                 placeholder="Website name or publication"
                 value={formData.source}
                 onChange={(e) => handleInputChange('source', e.target.value)}
+                className="h-11"
               />
             </div>
           </div>
@@ -271,6 +275,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
                 placeholder="https://example.com"
                 value={formData.url}
                 onChange={(e) => handleInputChange('url', e.target.value)}
+                className="h-11"
               />
             </div>
             <div className="space-y-2">
@@ -280,6 +285,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
                 type="date"
                 value={formData.dateAccessed}
                 onChange={(e) => handleInputChange('dateAccessed', e.target.value)}
+                className="h-11"
               />
             </div>
           </div>
@@ -293,7 +299,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
                 handleInputChange('type', value)
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-11">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -310,7 +316,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
             <Button 
               onClick={addCitation}
               disabled={!isFormValid}
-              className="flex-1"
+              className="flex-1 h-11"
             >
               <Plus size={16} className="mr-2" />
               Add to Bibliography
@@ -319,6 +325,7 @@ export function UrlCitationForm({ onCitationAdd }: UrlCitationFormProps) {
               variant="outline" 
               onClick={resetForm}
               disabled={!formData.title && !formData.source && !url}
+              className="h-11"
             >
               Clear Form
             </Button>
