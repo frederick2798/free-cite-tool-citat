@@ -218,6 +218,8 @@ export function Bibliography({ citations, onUpdate, onDelete, preferredStyle }: 
       toast.error('Failed to copy citations')
     }
   }
+
+  const exportBibliography = () => {
     if (filteredAndSortedCitations.length === 0) {
       toast.error('No citations to export')
       return
@@ -238,26 +240,6 @@ export function Bibliography({ citations, onUpdate, onDelete, preferredStyle }: 
     URL.revokeObjectURL(url)
     
     toast.success('Bibliography exported successfully!')
-  }
-
-  const copyInTextCitation = async (citation: Citation) => {
-    const inTextCitation = formatInTextCitation(citation, exportFormat)
-    try {
-      await navigator.clipboard.writeText(inTextCitation)
-      toast.success('In-text citation copied to clipboard!')
-    } catch (error) {
-      toast.error('Failed to copy in-text citation')
-    }
-  }
-
-  const copyFullCitation = async (citation: Citation) => {
-    const fullCitation = formatCitationForExport(citation, exportFormat)
-    try {
-      await navigator.clipboard.writeText(fullCitation)
-      toast.success('Full citation copied to clipboard!')
-    } catch (error) {
-      toast.error('Failed to copy citation')
-    }
   }
 
   const handleEdit = (citation: Citation) => {
