@@ -17,7 +17,10 @@ import {
   SortAsc,
   SortDesc,
   Filter,
-  Quotes
+  Quotes,
+  File,
+  FileWord,
+  FileCsv
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { Citation, CitationStyle } from '@/App'
@@ -38,6 +41,7 @@ export function Bibliography({ citations, onUpdate, onDelete, preferredStyle }: 
   const [filterBy, setFilterBy] = useState<FilterOption>('all')
   const [editingCitation, setEditingCitation] = useState<Citation | null>(null)
   const [exportFormat, setExportFormat] = useState<CitationStyle>(preferredStyle)
+  const [showExportDialog, setShowExportDialog] = useState(false)
 
   const filteredAndSortedCitations = citations
     .filter(citation => filterBy === 'all' || citation.type === filterBy)
@@ -219,27 +223,136 @@ export function Bibliography({ citations, onUpdate, onDelete, preferredStyle }: 
     }
   }
 
-  const exportBibliography = () => {
+  const exportBibliography = (format: 'txt' | 'rtf' | 'csv' | 'bibtex' | 'ris' | 'zotero' | 'mendeley') => {
     if (filteredAndSortedCitations.length === 0) {
       toast.error('No citations to export')
       return
     }
 
+    let content = ''
+    let filename = ''
+    let mimeType = 'text/plain'
+
     const formattedCitations = filteredAndSortedCitations.map(citation => 
       formatCitationForExport(citation, exportFormat)
-    ).join('\n\n')
+    )
 
-    const blob = new Blob([formattedCitations], { type: 'text/plain' })
+    switch (format) {
+      case 'txt':
+        content = formattedCitations.join('\n\n')
+        filename = `bibliography-${exportFormat}-${new Date().toISOString().split('T')[0]}.txt`
+        mimeType = 'text/plain'
+        break
+
+      case 'rtf':
+        // RTF format for Word compatibility
+        content = '{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}\\f0\\fs24 '
+        content += 'Bibliography\\par\\par '
+        content += formattedCitations.map(citation => citation.replace(/\n/g, '\\par ')).join('\\par\\par ')
+        content += '}'
+        filename = `bibliography-${exportFormat}-${new Date().toISOString().split('T')[0]}.rtf`
+        mimeType = 'application/rtf'
+        break
+
+      case 'csv':
+        const csvHeaders = 'Title,Authors,Year,Source,Type,URL,DOI,Pages,Volume,Issue'
+        const csvRows = filteredAndSortedCitations.map(citation => 
+          `"${citation.title}","${citation.authors.join('; ')}","${citation.year}","${citation.source}","${citation.type}","${citation.url || ''}","${citation.doi || ''}","${citation.pages || ''}","${citation.volume || ''}","${citation.issue || ''}"`
+        )
+        content = [csvHeaders, ...csvRows].join('\n')
+        filename = `bibliography-${exportFormat}-${new Date().toISOString().split('T')[0]}.csv`
+        mimeType = 'text/csv'
+        break
+
+      case 'bibtex':
+        content = filteredAndSortedCitations.map(citation => {
+          const key = citation.authors[0]?.split(',')[0]?.replace(/\s+/g, '') + citation.year
+          return `@article{${key},
+  title={${citation.title}},
+  author={${citation.authors.join(' and ')}},
+  year={${citation.year}},
+  journal={${citation.source}},
+  ${citation.volume ? `volume={${citation.volume}},` : ''}
+  ${citation.issue ? `number={${citation.issue}},` : ''}
+  ${citation.pages ? `pages={${citation.pages}},` : ''}
+  ${citation.doi ? `doi={${citation.doi}},` : ''}
+  ${citation.url ? `url={${citation.url}}` : ''}
+}`
+        }).join('\n\n')
+        filename = `bibliography-${new Date().toISOString().split('T')[0]}.bib`
+        mimeType = 'text/plain'
+        break
+
+      case 'ris':
+        content = filteredAndSortedCitations.map(citation => {
+          return `TY  - JOUR
+TI  - ${citation.title}
+${citation.authors.map(author => `AU  - ${author}`).join('\n')}
+PY  - ${citation.year}
+JO  - ${citation.source}
+${citation.volume ? `VL  - ${citation.volume}` : ''}
+${citation.issue ? `IS  - ${citation.issue}` : ''}
+${citation.pages ? `SP  - ${citation.pages.split('-')[0]}\nEP  - ${citation.pages.split('-')[1] || citation.pages.split('-')[0]}` : ''}
+${citation.doi ? `DO  - ${citation.doi}` : ''}
+${citation.url ? `UR  - ${citation.url}` : ''}
+ER  -`
+        }).join('\n\n')
+        filename = `bibliography-${new Date().toISOString().split('T')[0]}.ris`
+        mimeType = 'text/plain'
+        break
+
+      case 'zotero':
+        // Zotero-compatible RDF format
+        content = `<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:z="http://www.zotero.org/namespaces/export#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/">
+${filteredAndSortedCitations.map(citation => `
+  <rdf:Description rdf:about="urn:isbn:${citation.id}">
+    <dc:title>${citation.title}</dc:title>
+    <dc:creator>${citation.authors.join('; ')}</dc:creator>
+    <dc:date>${citation.year}</dc:date>
+    <dc:source>${citation.source}</dc:source>
+    <dc:type>${citation.type}</dc:type>
+    ${citation.url ? `<dc:identifier>${citation.url}</dc:identifier>` : ''}
+  </rdf:Description>`).join('')}
+</rdf:RDF>`
+        filename = `bibliography-zotero-${new Date().toISOString().split('T')[0]}.rdf`
+        mimeType = 'application/rdf+xml'
+        break
+
+      case 'mendeley':
+        // Mendeley-compatible format (similar to RIS but with specific tags)
+        content = filteredAndSortedCitations.map(citation => {
+          return `Type: Journal Article
+Title: ${citation.title}
+Authors: ${citation.authors.join('; ')}
+Year: ${citation.year}
+Journal: ${citation.source}
+${citation.volume ? `Volume: ${citation.volume}` : ''}
+${citation.issue ? `Issue: ${citation.issue}` : ''}
+${citation.pages ? `Pages: ${citation.pages}` : ''}
+${citation.doi ? `DOI: ${citation.doi}` : ''}
+${citation.url ? `URL: ${citation.url}` : ''}
+`
+        }).join('\n---\n\n')
+        filename = `bibliography-mendeley-${new Date().toISOString().split('T')[0]}.txt`
+        mimeType = 'text/plain'
+        break
+    }
+
+    const blob = new Blob([content], { type: mimeType })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `bibliography-${exportFormat}-${new Date().toISOString().split('T')[0]}.txt`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     
-    toast.success('Bibliography exported successfully!')
+    toast.success(`Bibliography exported as ${format.toUpperCase()}!`)
+    setShowExportDialog(false)
   }
 
   const handleEdit = (citation: Citation) => {
@@ -371,10 +484,119 @@ export function Bibliography({ citations, onUpdate, onDelete, preferredStyle }: 
                 Copy All
               </Button>
 
-              <Button size="sm" onClick={exportBibliography}>
-                <Download size={14} className="mr-1" />
-                Export
-              </Button>
+              <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <Download size={14} className="mr-1" />
+                    Export
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Export Bibliography</DialogTitle>
+                    <DialogDescription>
+                      Choose your preferred export format
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="grid gap-3 py-4">
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium">Document Formats</h4>
+                      <div className="grid gap-2">
+                        <Button
+                          variant="outline"
+                          className="justify-start h-auto p-3"
+                          onClick={() => exportBibliography('rtf')}
+                        >
+                          <FileWord size={16} className="mr-3 text-blue-600" />
+                          <div className="text-left">
+                            <div className="font-medium">Word Document (.rtf)</div>
+                            <div className="text-xs text-muted-foreground">Compatible with Microsoft Word</div>
+                          </div>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="justify-start h-auto p-3"
+                          onClick={() => exportBibliography('txt')}
+                        >
+                          <File size={16} className="mr-3 text-gray-600" />
+                          <div className="text-left">
+                            <div className="font-medium">Plain Text (.txt)</div>
+                            <div className="text-xs text-muted-foreground">Simple text format</div>
+                          </div>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="justify-start h-auto p-3"
+                          onClick={() => exportBibliography('csv')}
+                        >
+                          <FileCsv size={16} className="mr-3 text-green-600" />
+                          <div className="text-left">
+                            <div className="font-medium">CSV Spreadsheet (.csv)</div>
+                            <div className="text-xs text-muted-foreground">For Excel and data analysis</div>
+                          </div>
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium">Reference Manager Formats</h4>
+                      <div className="grid gap-2">
+                        <Button
+                          variant="outline"
+                          className="justify-start h-auto p-3"
+                          onClick={() => exportBibliography('zotero')}
+                        >
+                          <BookOpen size={16} className="mr-3 text-red-600" />
+                          <div className="text-left">
+                            <div className="font-medium">Zotero (.rdf)</div>
+                            <div className="text-xs text-muted-foreground">Import into Zotero</div>
+                          </div>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="justify-start h-auto p-3"
+                          onClick={() => exportBibliography('mendeley')}
+                        >
+                          <BookOpen size={16} className="mr-3 text-orange-600" />
+                          <div className="text-left">
+                            <div className="font-medium">Mendeley (.txt)</div>
+                            <div className="text-xs text-muted-foreground">Import into Mendeley</div>
+                          </div>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="justify-start h-auto p-3"
+                          onClick={() => exportBibliography('bibtex')}
+                        >
+                          <FileText size={16} className="mr-3 text-purple-600" />
+                          <div className="text-left">
+                            <div className="font-medium">BibTeX (.bib)</div>
+                            <div className="text-xs text-muted-foreground">For LaTeX documents</div>
+                          </div>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="justify-start h-auto p-3"
+                          onClick={() => exportBibliography('ris')}
+                        >
+                          <FileText size={16} className="mr-3 text-indigo-600" />
+                          <div className="text-left">
+                            <div className="font-medium">RIS (.ris)</div>
+                            <div className="text-xs text-muted-foreground">Research Information Systems</div>
+                          </div>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                      Cancel
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
