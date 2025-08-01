@@ -290,6 +290,28 @@ ${citation.url ? `URL: ${citation.url}` : ''}
               </CardContent>
             </Card>
 
+            {/* Quick Access to Bibliography */}
+            <Card className="bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <BookOpen size={20} className="text-accent" />
+                    <div>
+                      <h3 className="font-semibold text-foreground">Manage Your Bibliography</h3>
+                      <p className="text-sm text-muted-foreground">View, edit, and export your saved citations</p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => setActiveTab('bibliography')}
+                    className="bg-accent hover:bg-accent/90 text-accent-foreground"
+                  >
+                    <BookOpen size={16} className="mr-2" />
+                    Go to Bibliography
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Smart Search and Reference Type - Always Visible */}
             <CombinedCitationForm 
               onCitationAdd={addCitation} 
@@ -378,12 +400,19 @@ ${citation.url ? `URL: ${citation.url}` : ''}
                       {savedCitations.filter(c => c.type === 'website').length}
                     </span>
                   </div>
+                  <Button 
+                    onClick={() => setActiveTab('bibliography')}
+                    className="w-full mt-4 bg-primary hover:bg-primary/90"
+                  >
+                    <BookOpen size={16} className="mr-2" />
+                    Go to Bibliography
+                  </Button>
                   <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="w-full mt-4"
+                        className="w-full mt-2"
                         disabled={savedCitations.length === 0}
                       >
                         <Download size={16} className="mr-2" />
