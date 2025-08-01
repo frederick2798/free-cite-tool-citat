@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { BookOpen, Download, Search, FileText, GraduationCap, Plus, FileWord, File } from '@phosphor-icons/react'
+import { toast } from 'sonner'
 import { CombinedCitationForm } from '@/components/CombinedCitationForm'
 import { UrlCitationForm } from '@/components/UrlCitationForm'
 import { Bibliography } from '@/components/Bibliography'
@@ -302,7 +303,18 @@ ${citation.url ? `URL: ${citation.url}` : ''}
                     </div>
                   </div>
                   <Button 
-                    onClick={() => setActiveTab('bibliography')}
+                    onClick={() => {
+                      setActiveTab('bibliography')
+                      // Show a toast to confirm navigation
+                      toast.success('Navigating to your bibliography...')
+                      // Scroll to the tabs section for better UX
+                      setTimeout(() => {
+                        const tabsElement = document.querySelector('[data-tabs-content]')
+                        if (tabsElement) {
+                          tabsElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        }
+                      }, 100)
+                    }}
                     className="bg-accent hover:bg-accent/90 text-accent-foreground"
                   >
                     <BookOpen size={16} className="mr-2" />
@@ -318,7 +330,7 @@ ${citation.url ? `URL: ${citation.url}` : ''}
               preferredStyle={preferredStyle}
             />
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" data-tabs-content>
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="url" className="flex items-center gap-2">
                   <FileText size={16} />
@@ -401,7 +413,18 @@ ${citation.url ? `URL: ${citation.url}` : ''}
                     </span>
                   </div>
                   <Button 
-                    onClick={() => setActiveTab('bibliography')}
+                    onClick={() => {
+                      setActiveTab('bibliography')
+                      // Show a toast to confirm navigation
+                      toast.success('Navigating to your bibliography...')
+                      // Scroll to the tabs section for better UX
+                      setTimeout(() => {
+                        const tabsElement = document.querySelector('[data-tabs-content]')
+                        if (tabsElement) {
+                          tabsElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        }
+                      }, 100)
+                    }}
                     className="w-full mt-4 bg-primary hover:bg-primary/90"
                   >
                     <BookOpen size={16} className="mr-2" />

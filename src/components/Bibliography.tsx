@@ -403,13 +403,24 @@ ${citation.url ? `URL: ${citation.url}` : ''}
   if (citations.length === 0) {
     return (
       <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Your Bibliography</CardTitle>
+          <CardDescription>
+            Your personal citation collection
+          </CardDescription>
+        </CardHeader>
         <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center space-y-3">
-            <BookOpen size={32} className="mx-auto text-muted-foreground" />
-            <p className="text-muted-foreground">Your bibliography is empty</p>
-            <p className="text-sm text-muted-foreground">
-              Start by searching for articles or adding URL citations
-            </p>
+          <div className="text-center space-y-4">
+            <BookOpen size={48} className="mx-auto text-muted-foreground" />
+            <div>
+              <p className="text-lg font-medium text-muted-foreground">Your bibliography is empty</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Start by searching for articles using the Smart Search above, or add URL citations
+              </p>
+            </div>
+            <div className="text-xs text-muted-foreground bg-muted p-3 rounded-lg max-w-md">
+              💡 <strong>Tip:</strong> Once you add citations, you can manage, edit, copy, and export them from this page.
+            </div>
           </div>
         </CardContent>
       </Card>
