@@ -4,12 +4,13 @@ import { defineConfig, PluginOption } from "vite";
 
 import sparkPlugin from "@github/spark/spark-vite-plugin";
 import createIconImportProxy from "@github/spark/vitePhosphorIconProxyPlugin";
-import { resolve } from 'path'
+import { resolve } from 'path';
 
-const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
+const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname;
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
+  base: '/free-cite-tool-citat/',  // <-- IMPORTANT: Add this for GitHub Pages
   plugins: [
     react(),
     tailwindcss(),
@@ -21,5 +22,8 @@ export default defineConfig({
     alias: {
       '@': resolve(projectRoot, 'src')
     }
+  },
+  build: {
+    outDir: 'dist',  // standard output directory for GitHub Pages deployment
   },
 });
